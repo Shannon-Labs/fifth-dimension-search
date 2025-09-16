@@ -13,7 +13,7 @@ S = \frac{1}{16 \pi} \int d^4x \sqrt{-g} \left[ \Phi R - \frac{\omega(\Phi)}{\Ph
 where:
 
 - \(\Phi\) is the effective scalar field (implemented numerically as `phi_brane`).
-- \(\omega(\Phi)\) controls the coupling strength; we currently assume it is constant and encode it via the `BSSNParameters.q` knob.
+- \(\omega(\Phi)\) controls the coupling strength; we currently assume it is constant and expose it as `BSSNParameters.scalar_tensor_omega`.
 - \(V(\Phi)\) maps onto the mass parameter `m5` through a simple quadratic potential \(V = \frac{1}{2} m_\phi^2 (\Phi - \Phi_0)^2\).
 
 For now we linearise around \(\Phi_0 = 1\) so that the Einstein equations reduce to:
@@ -67,5 +67,7 @@ To remain consistent with the scalar–tensor interpretation we:
 - [ ] Derive explicit source terms for \(\rho_\Phi\), \(S_i^\Phi\), and \(S_{ij}^\Phi\) and cross-check with `stress_energy_brane`.
 - [ ] Implement a spectral or analytic solution (e.g., static Yukawa field in flat space) and compare against the numerical data.
 - [ ] Benchmark the scalar dynamics against a known Jordan–Brans–Dicke solution in the weak-field limit.
+
+✅ **Progress:** `tests/test_scalar_tensor.py` verifies that the new Yukawa initial data matches the analytic profile at the percent level.
 
 Contributions welcome—append derivations or references directly to this file.

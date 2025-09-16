@@ -69,6 +69,7 @@ class BSSNParameters:
     L5: float = 1.0  # characteristic length of compact dimension (parametric)
     brane_stiffness: float = 1.0  # brane scalar field self-interaction strength
     brane_matter_coupling: float = 5.0  # dimensionless strength of matter-scalar coupling
+    scalar_tensor_omega: float = 100.0  # effective Brans–Dicke coupling ω
     lattice_length_km: float = 1.5  # sets the conversion between geom. and SI units
     nuclear_density_cgs: float = 2.8e14  # fiducial density (g/cm^3)
     nuclear_pressure_cgs: float = 3.0e33  # fiducial pressure (dyn/cm^2)
@@ -575,40 +576,36 @@ def magnetic_part_of_weyl(
 
 def stress_energy_brane(state: BSSNState, spacing: Sequence[float], params: BSSNParameters) -> Dict[str, torch.Tensor]:
     phi = state.phi_brane
-    A = state.A_mu
+    Phi = 1.0 + phi
 
     grad_phi = gradient(phi, spacing)
     grad_phi_sq = sum(g ** 2 for g in grad_phi[:SPATIAL_DIMS])
 
-    F = torch.zeros((SPATIAL_DIMS, SPATIAL_DIMS, *phi.shape), dtype=phi.dtype, device=phi.device)
-    for i in range(SPATIAL_DIMS):
-        for j in range(SPATIAL_DIMS):
-            F[i, j] = central_diff(A[j + 1], i, spacing) - central_diff(A[i + 1], j, spacing)
+    omega = params.scalar_tensor_omega
+    omega_factor = omega / torch.clamp(Phi ** 2, min=GEOMETRIC_EPS)
 
-    E = [central_diff(A[0], i, spacing) for i in range(SPATIAL_DIMS)]
+    potential = 0.5 * (params.m5 ** 2) * (Phi - 1.0) ** 2
 
-    E_sq = sum(e ** 2 for e in E)
-    B_sq = 0.0
-    for i in range(SPATIAL_DIMS):
-        for j in range(SPATIAL_DIMS):
-            B_sq = B_sq + 0.5 * F[i, j] ** 2
-
-    mass_term = 0.5 * (params.m5 ** 2) * phi ** 2
-
-    rho = 0.5 * (grad_phi_sq + E_sq + B_sq) + mass_term + state.rho_fluid
+    rho_scalar = 0.5 * omega_factor * grad_phi_sq + potential
+    rho = rho_scalar + state.rho_fluid
 
     Sij = torch.zeros((SPATIAL_DIMS, SPATIAL_DIMS, *phi.shape), dtype=phi.dtype, device=phi.device)
     for i in range(SPATIAL_DIMS):
         for j in range(SPATIAL_DIMS):
-            Sij[i, j] = grad_phi[i] * grad_phi[j]
-            for k in range(SPATIAL_DIMS):
-                Sij[i, j] = Sij[i, j] + F[i, k] * F[j, k]
+            anisotropic = omega_factor * grad_phi[i] * grad_phi[j]
+            Sij[i, j] = anisotropic
             if i == j:
-                Sij[i, j] = Sij[i, j] + (E_sq + B_sq + grad_phi_sq) / 2.0 + state.p_fluid
+                Sij[i, j] = Sij[i, j] - 0.5 * omega_factor * grad_phi_sq - potential + state.p_fluid
 
     trace_S = sum(Sij[i, i] for i in range(SPATIAL_DIMS))
 
-    return {"rho": rho, "Sij": Sij, "trace_S": trace_S, "rho_fluid": state.rho_fluid, "p_fluid": state.p_fluid}
+    return {
+        "rho": rho,
+        "Sij": Sij,
+        "trace_S": trace_S,
+        "rho_fluid": state.rho_fluid,
+        "p_fluid": state.p_fluid,
+    }
 
 
 def fluid_equilibrium_nudge(state: BSSNState, spacing: Sequence[float], params: BSSNParameters) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:

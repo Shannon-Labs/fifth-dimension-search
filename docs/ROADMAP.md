@@ -8,6 +8,7 @@ This document expands on the roadmap bullets in the README and tracks medium-ter
 - [x] Commit to the scalar–tensor (Option B) upgrade path and capture the decision in [`THEORY_FRAMEWORK.md`](THEORY_FRAMEWORK.md).
 - [ ] Replace the ad-hoc scalar field evolution with an implementation consistent with the chosen theory.
 - [ ] Add convergence tests that exercise the real evolution code (the current `convergence_test.py` is a deterministic placeholder).
+- [x] Validate the scalar Yukawa initial data against an analytic profile (`tests/test_scalar_tensor.py`).
 
 ## Tooling and Developer Experience
 
