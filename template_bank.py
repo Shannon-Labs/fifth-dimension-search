@@ -8,10 +8,10 @@ from typing import Iterable, List, Sequence, Tuple
 import numpy as np
 import torch
 
-from .bssn_kk_evolver import (
+from bssn_brane_evolver import (
     BSSNParameters,
     bssn_rhs,
-    enforce_periodic_state,
+    enforce_boundary_conditions,
     extract_waveform,
     integrate_psi4_series,
     scale_waveform_to_observer,
@@ -45,13 +45,15 @@ def evolve_to_waveform(
         if base_device.type == "cuda":
             rhs = bssn_rhs(state, spacing, params)
             state = state_linear_combination(state, rhs, dt)
-            enforce_periodic_state(state)
+            # Use absorbing boundary conditions for physical space, periodic for W
+            enforce_boundary_conditions(state, spacing, mode="periodic_w")
             snapshot = state.to("cpu", dtype=torch.float64)
         else:
             work = state.to(device=base_device, dtype=torch.float32 if base_device.type == "mps" else torch.float64)
             rhs = bssn_rhs(work, spacing, params).to(device="cpu", dtype=torch.float64)
             state = state_linear_combination(state, rhs, dt)
-            enforce_periodic_state(state)
+            # Use absorbing boundary conditions for physical space, periodic for W
+            enforce_boundary_conditions(state, spacing, mode="periodic_w")
             snapshot = state
 
         waveform = extract_waveform(snapshot, spacing, radius=radius, projection="plus", params=params)

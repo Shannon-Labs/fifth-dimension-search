@@ -1,20 +1,40 @@
-# 🌌 The Fifth Dimension Hunt: Testing Kaluza-Klein Gravity with LIGO/Virgo
+# 🧪 Fifth Dimension Research Sandbox: Exploring Extra Dimensions with Gravitational Waves
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![CUDA/MPS Support](https://img.shields.io/badge/accelerated-CUDA%2FMPS-green.svg)](https://developer.nvidia.com/cuda-toolkit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **What if gravity can escape into a hidden dimension that we can't see?**
+> **⚠️ RESEARCH SANDBOX DISCLAIMER: This is exploratory code with known physics issues, NOT a validated detection pipeline**
 
-We're using LIGO/Virgo gravitational wave detectors to search for evidence of a 5th spatial dimension predicted by Kaluza-Klein theory. When black holes or neutron stars collide, they create ripples in spacetime. If there's a hidden dimension, these ripples would "leak" slightly into the extra dimension, changing the signal in a way we can measure.
+## What This IS
 
-## 🔬 The Core Discovery
+- 🧪 **Research sandbox** for exploring extra-dimensional gravity effects
+- 🤝 **Community collaboration project** seeking physics input and code contributions
+- 📚 **Educational exploration** of how extra dimensions might affect gravitational waves
+- 🔬 **Toy model** for testing numerical relativity techniques
+- 💡 **Starting point** for future rigorous implementations
 
-Our simulations reveal that black hole mergers and neutron star mergers respond differently to a potential 5th dimension:
+## What This IS NOT
 
-- **Black Holes** (pure spacetime): Show ~3 milliradian phase shifts
-- **Neutron Stars** (matter): Show different phase evolution patterns  
-- **The Smoking Gun**: This differential response could reveal extra dimensions
+- ❌ **NOT a validated detection pipeline** - contains fundamental physics errors
+- ❌ **NOT real Kaluza-Klein theory** - simplified toy model at best
+- ❌ **NOT ready for scientific publication** - needs extensive physics fixes
+- ❌ **NOT claiming any detections** - results are exploratory only
+- ❌ **NOT suitable for actual LIGO/Virgo analysis** without major corrections
+
+## 🚨 Critical Issues We Know About
+
+This code has **fundamental problems** we're actively working to fix:
+- Strain amplitudes wrong by factor of 10^10 (completely unphysical)
+- No actual 5D physics implemented (claims 5D but only evolves 3D)
+- Dimensional analysis errors throughout
+- Not implementing any consistent theory
+
+See `KNOWN_ISSUES.md` for complete list. **We share this broken code to get community help fixing it!**
+
+## 🎯 Our Ambitious but Broken Attempt
+
+We're exploring whether gravitational waves could reveal extra dimensions by comparing black hole vs neutron star mergers. The physics intuition is sound, but our implementation has serious bugs we need help fixing.
 
 ## 🚀 Quick Start
 
@@ -33,33 +53,45 @@ python run/bssn_kk_evolver.py --test-mode
 python tools/analyze_waveforms.py
 ```
 
-## 📊 The Physics: Kaluza-Klein Theory
+## 📊 The Physics Concept (What We're Trying to Model)
 
-In 1921, Theodor Kaluza showed that Einstein's General Relativity in 5 dimensions naturally unifies gravity and electromagnetism. The 5th dimension is "compactified" - curled up so small we can't see it directly.
+In 1921, Theodor Kaluza showed that Einstein's General Relativity in 5 dimensions naturally unifies gravity and electromagnetism. Modern theories suggest extra dimensions could be detectable through gravitational wave observations.
 
-### Key Parameters:
+### Key Parameters (In Our Toy Model):
 - `q`: KK charge - coupling to extra dimension (10⁻⁴ to 10⁻³)
 - `L₅`: Compactification radius - size of hidden dimension
 - `m₅`: 5D mass parameter - energy scale of effects
 
-## 🎯 Current Status
+**⚠️ Important**: Our implementation of these concepts is fundamentally flawed - see issues below.
 
-⚠️ **Important Note**: Independent validation has identified issues that need fixing:
-- Phase measurement precision needs recalibration
-- Statistical requirements are higher than initially estimated  
-- Some dimensional analysis needs correction
+## 🎯 Project Status: Broken but Collaborative
 
-See `VALIDATION_STATUS.md` for details and ongoing fixes.
+**Current Reality**: This code has serious physics problems that make results meaningless:
+- No actual 5D evolution implemented despite claims
+- Strain scaling wrong by 10 orders of magnitude
+- Dimensional analysis errors throughout equations
+- Not implementing any consistent extra-dimensional theory
 
-## 🤝 Contributing
+**Our Approach**: Share the broken code openly and invite community collaboration to fix it.
 
-We need help with:
-- Fixing dimensional analysis in equations
-- Improving wave extraction accuracy
-- Connecting to LIGO/Virgo data pipelines
-- Statistical analysis and parameter estimation
+**Help Wanted**: Theoretical physicists, numerical relativity experts, and anyone interested in making this concept work properly!
 
-See `CONTRIBUTING.md` for guidelines.
+## 🤝 How You Can Help
+
+**Priority Issues** (pick any that interest you):
+1. **Fix strain scaling** - figure out why amplitudes are 10^10 too small
+2. **Implement real 5D physics** - currently we only evolve 3D despite claiming 5D
+3. **Fix dimensional analysis** - equations mix dimensionless and dimensional quantities
+4. **Choose consistent theory** - decide between KK, brane-world, or honest toy model
+5. **Add convergence testing** - verify numerical results don't depend on resolution
+
+**How to Contribute**:
+- Open an issue discussing which problem you want to tackle
+- Fork the repo and work on fixes with clear documentation
+- Submit PRs with before/after comparisons showing improvements
+- Help us understand what real extra-dimensional theories predict
+
+**All Skill Levels Welcome**: Even just confirming our bug reports is valuable!
 
 ## 📚 References
 
@@ -73,4 +105,6 @@ MIT License - see LICENSE file for details.
 
 ---
 
-*The hunt for hidden dimensions continues!*
+*"Here's our ambitious but broken attempt at detecting extra dimensions with gravitational waves - help us make it real!"*
+
+**Join the collaboration**: Together we can turn this broken toy model into something that might actually work.
