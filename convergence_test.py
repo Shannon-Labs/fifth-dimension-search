@@ -1,250 +1,112 @@
 #!/usr/bin/env python3
-"""
-Convergence testing for the brane-world GW sandbox.
+"""Simple deterministic convergence experiment for contributors.
 
-This module tests numerical convergence of the evolution code
-by running simulations at different resolutions and checking
-that phase differences scale appropriately.
+The original project claimed to run convergence studies on the full numerical
+relativity code, but the required classes were never implemented. This module
+provides a lightweight, reproducible example that demonstrates the workflow we
+expect new contributions to follow:
+
+1. Define an analytic "truth" solution.
+2. Compute discrete approximations at different resolutions.
+3. Estimate the observed convergence order using Richardson extrapolation.
+
+The toy problem below evaluates the phase of a chirping complex exponential.
+Sampling at finite resolution introduces an error ~O(Δt), therefore the script
+should report first-order convergence.
 """
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Iterable, List
 
 import numpy as np
-import json
-from typing import List, Dict, Tuple
-from bssn_brane_evolver import BSSNBraneEvolver
-from template_bank import TemplateBank
 
 
-def run_convergence_test(
-    resolutions: List[int] = [32, 64, 128],
-    mass1: float = 1.4,
-    mass2: float = 1.4,
-    save_results: bool = True
-) -> Dict:
-    """
-    Run convergence test at multiple resolutions.
+@dataclass
+class ConvergenceResult:
+    resolution: int
+    dt: float
+    phase_estimate: float
+    phase_error: float
 
-    Args:
-        resolutions: List of grid resolutions to test
-        mass1: Primary mass in solar masses
-        mass2: Secondary mass in solar masses
-        save_results: Whether to save results to file
 
-    Returns:
-        Dictionary with convergence test results
-    """
+TRUE_FINAL_TIME = 1.0
 
-    print(f"Running convergence test for M1={mass1}, M2={mass2}")
-    print(f"Testing resolutions: {resolutions}")
 
-    results = {
-        'resolutions': resolutions,
-        'mass1': mass1,
-        'mass2': mass2,
-        'phases': [],
-        'amplitudes': [],
-        'convergence_order': None,
-        'errors': []
-    }
+def analytic_phase(time: np.ndarray) -> np.ndarray:
+    """Analytic phase model used for the convergence experiment."""
 
-    # Run simulations at each resolution
-    for N in resolutions:
-        print(f"\nRunning N={N}...")
+    # A gently chirping signal: phi(t) = 20 t + 4 t^2 radians
+    return 20.0 * time + 4.0 * time ** 2
 
-        # Initialize evolver and template bank
-        evolver = BSSNBraneEvolver(
-            N=N,
-            box_size=200.0,
-            cfl=0.25,
-            brane_stiffness=0.1,
-            matter_scalar_coupling=0.05
-        )
 
-        bank = TemplateBank(evolver)
+def sample_phase(resolution: int) -> ConvergenceResult:
+    """Return the phase estimate obtained with `resolution` samples."""
 
-        # Generate waveform
-        h_plus, h_cross, times = bank.generate_template(
-            mass1, mass2,
-            chi1=[0, 0, 0.1],
-            chi2=[0, 0, -0.1],
-            brane_amplitude=0.1
-        )
+    if resolution <= 1:
+        raise ValueError("Resolution must be greater than 1 for a convergence test")
 
-        # Extract phase and amplitude at merger
-        merger_idx = np.argmax(np.abs(h_plus))
-        phase = np.angle(h_plus[merger_idx] + 1j * h_cross[merger_idx])
-        amplitude = np.abs(h_plus[merger_idx])
+    dt = TRUE_FINAL_TIME / resolution
+    sample_time = np.linspace(0.0, TRUE_FINAL_TIME - dt, resolution)
+    complex_signal = np.exp(1j * analytic_phase(sample_time))
+    phase_estimate = float(np.angle(complex_signal[-1]))
+    true_phase = float(analytic_phase(np.array([TRUE_FINAL_TIME]))[0])
+    phase_error = abs(true_phase - phase_estimate)
+    return ConvergenceResult(resolution=resolution, dt=dt, phase_estimate=phase_estimate, phase_error=phase_error)
 
-        results['phases'].append(phase)
-        results['amplitudes'].append(amplitude)
 
-        print(f"  Phase at merger: {phase:.6f} rad")
-        print(f"  Amplitude at merger: {amplitude:.3e}")
-
-    # Calculate convergence order using Richardson extrapolation
-    if len(resolutions) >= 3:
-        phases = np.array(results['phases'])
-
-        # Assuming second-order convergence, estimate errors
-        for i in range(len(phases) - 1):
-            error = abs(phases[i+1] - phases[i])
-            results['errors'].append(error)
-
-        # Richardson extrapolation for convergence order
-        if len(phases) >= 3:
-            e1 = abs(phases[1] - phases[0])  # Error at coarse resolution
-            e2 = abs(phases[2] - phases[1])  # Error at fine resolution
-
-            if e2 > 0 and e1 > 0:
-                # Assuming grid spacing halves each time
-                convergence_order = np.log2(e1 / e2)
-                results['convergence_order'] = convergence_order
-
-                print(f"\nConvergence Analysis:")
-                print(f"  Error (N={resolutions[0]}→{resolutions[1]}): {e1:.6e} rad")
-                print(f"  Error (N={resolutions[1]}→{resolutions[2]}): {e2:.6e} rad")
-                print(f"  Convergence order: {convergence_order:.2f}")
-
-                if convergence_order < 1.5:
-                    print("  WARNING: Poor convergence! Expected order ≥ 2")
-                else:
-                    print("  ✓ Good convergence")
-
-    # Save results
-    if save_results:
-        with open('convergence_test_results.json', 'w') as f:
-            # Convert numpy types to native Python for JSON serialization
-            json_results = {
-                k: v.tolist() if isinstance(v, np.ndarray) else v
-                for k, v in results.items()
-            }
-            json.dump(json_results, f, indent=2)
-        print(f"\nResults saved to convergence_test_results.json")
-
+def run_convergence_study(resolutions: Iterable[int]) -> List[ConvergenceResult]:
+    results = [sample_phase(res) for res in resolutions]
+    results.sort(key=lambda item: item.resolution)
     return results
 
 
-def plot_convergence(results: Dict, save_fig: bool = True):
-    """
-    Plot convergence test results.
+def estimate_convergence_order(results: List[ConvergenceResult]) -> float | None:
+    """Estimate the observed convergence order using consecutive resolutions."""
 
-    Args:
-        results: Dictionary from run_convergence_test
-        save_fig: Whether to save figure
-    """
-    try:
-        import matplotlib.pyplot as plt
+    if len(results) < 3:
+        return None
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    # Assume the grid spacing halves between the last three resolutions
+    e1 = results[-3].phase_error
+    e2 = results[-2].phase_error
+    e3 = results[-1].phase_error
 
-        # Plot phase vs resolution
-        ax1.plot(results['resolutions'], results['phases'], 'o-', linewidth=2)
-        ax1.set_xlabel('Grid Resolution N')
-        ax1.set_ylabel('Phase at Merger (rad)')
-        ax1.set_title('Phase Convergence')
-        ax1.grid(True, alpha=0.3)
-        ax1.set_xscale('log', base=2)
+    if e1 == 0 or e2 == 0 or e3 == 0:
+        return None
 
-        # Plot error vs resolution
-        if results['errors']:
-            res_pairs = [(results['resolutions'][i], results['resolutions'][i+1])
-                        for i in range(len(results['errors']))]
-            res_labels = [f"{r1}→{r2}" for r1, r2 in res_pairs]
-
-            ax2.bar(range(len(results['errors'])), results['errors'])
-            ax2.set_xticks(range(len(results['errors'])))
-            ax2.set_xticklabels(res_labels)
-            ax2.set_ylabel('Phase Error (rad)')
-            ax2.set_title(f"Convergence Order: {results['convergence_order']:.2f}")
-            ax2.set_yscale('log')
-            ax2.grid(True, alpha=0.3)
-
-        plt.suptitle(f"Convergence Test: M1={results['mass1']}M☉, M2={results['mass2']}M☉")
-        plt.tight_layout()
-
-        if save_fig:
-            plt.savefig('convergence_test.png', dpi=150, bbox_inches='tight')
-            print("Plot saved to convergence_test.png")
-
-        plt.show()
-
-    except ImportError:
-        print("Matplotlib not available, skipping plot")
+    # Standard Richardson estimate
+    return np.log((e1 - e2) / (e2 - e3)) / np.log(2)
 
 
-def verify_convergence_requirement(
-    min_order: float = 1.5,
-    resolutions: List[int] = None
-) -> bool:
-    """
-    Verify that the code meets minimum convergence requirements.
+def save_results(results: List[ConvergenceResult], order: float | None, path: Path) -> None:
+    payload = {
+        "results": [asdict(item) for item in results],
+        "estimated_order": order,
+        "analytic_phase": "phi(t) = 20 t + 4 t^2",
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2))
+    print(f"Saved convergence report to {path}")
 
-    Args:
-        min_order: Minimum acceptable convergence order
-        resolutions: Grid resolutions to test
 
-    Returns:
-        True if convergence is acceptable, False otherwise
-    """
+def main() -> None:
+    resolutions = (32, 64, 128)
+    results = run_convergence_study(resolutions)
+    order = estimate_convergence_order(results)
 
-    if resolutions is None:
-        resolutions = [32, 64, 128]
-
-    print("=" * 60)
-    print("CONVERGENCE VERIFICATION TEST")
-    print("=" * 60)
-
-    # Test BBH system
-    print("\nTesting BBH (30+30 M☉):")
-    bbh_results = run_convergence_test(
-        resolutions=resolutions,
-        mass1=30.0,
-        mass2=30.0,
-        save_results=False
-    )
-
-    # Test BNS system
-    print("\nTesting BNS (1.4+1.4 M☉):")
-    bns_results = run_convergence_test(
-        resolutions=resolutions,
-        mass1=1.4,
-        mass2=1.4,
-        save_results=False
-    )
-
-    # Check convergence orders
-    passed = True
-
-    if bbh_results['convergence_order'] is not None:
-        if bbh_results['convergence_order'] < min_order:
-            print(f"\n❌ BBH convergence order {bbh_results['convergence_order']:.2f} < {min_order}")
-            passed = False
-        else:
-            print(f"\n✓ BBH convergence order {bbh_results['convergence_order']:.2f} ≥ {min_order}")
-
-    if bns_results['convergence_order'] is not None:
-        if bns_results['convergence_order'] < min_order:
-            print(f"❌ BNS convergence order {bns_results['convergence_order']:.2f} < {min_order}")
-            passed = False
-        else:
-            print(f"✓ BNS convergence order {bns_results['convergence_order']:.2f} ≥ {min_order}")
-
-    print("\n" + "=" * 60)
-    if passed:
-        print("✓ CONVERGENCE TEST PASSED")
+    print("Convergence study for toy chirp phase")
+    for entry in results:
+        print(f"  N={entry.resolution:<4d} phase={entry.phase_estimate:+.5f} rad error={entry.phase_error:.3e}")
+    if order is not None:
+        print(f"Observed convergence order ≈ {order:.2f}")
     else:
-        print("❌ CONVERGENCE TEST FAILED")
-        print("The numerical scheme needs improvement for reliable results")
-    print("=" * 60)
+        print("Unable to estimate convergence order – need at least three non-zero errors")
 
-    return passed
+    save_results(results, order, Path("artifacts/convergence_results.json"))
 
 
 if __name__ == "__main__":
-    # Run basic convergence test
-    results = run_convergence_test()
-
-    # Plot results
-    plot_convergence(results)
-
-    # Verify convergence meets requirements
-    verify_convergence_requirement()
+    main()

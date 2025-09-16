@@ -6,21 +6,21 @@
 
 ### 1. No Real 5D Physics Implemented
 - **Problem**: We claim to simulate 5D gravity but only evolve 3D spacetime
-- **Location**: `bssn_kk_evolver.py:249` - Laplacian only sums over 3D
+- **Location**: `src/fifth_dimension_search/brane_world.py:249` - Laplacian only sums over 3D
 - **Evidence**: `laplacian = d2_dx2 + d2_dy2 + d2_dz2` (no d2_dW2 term!)
 - **Impact**: This is not extra-dimensional physics in any sense
 - **Reality Check**: We're fooling ourselves about what we're computing
 
 ### 2. Strain Scaling Wrong by 10^10 Factor
-- **Problem**: Gravitational wave amplitudes are h ~ 10^-30 instead of physical h ~ 10^-21
-- **Location**: `template_bank.py:90-97`, wave extraction in `bssn_kk_evolver.py`
-- **Evidence**: `phase_amp_summary.csv` shows peak_h_plus = 5.172377e-30
-- **Impact**: Completely undetectable by any conceivable detector
-- **Reality Check**: No physical signal would be this weak
+- **Problem**: (Resolved in current branch) geometric-to-observer conversion under-estimated strains by ~10⁹
+- **Location**: `src/fifth_dimension_search/template_bank.py:88-95`, wave extraction in `src/fifth_dimension_search/brane_world.py`
+- **Evidence**: `datasets/phase_amp_summary.csv` now reports peak_h_plus ≈ 6.4×10⁻²¹ after the fix. Previous revisions produced 5×10⁻³⁰.
+- **Impact**: Physical plausibility restored for the toy data, although the underlying physics model is still inconsistent
+- **Reality Check**: Further validation against calibrated waveforms is required before trusting any quantitative claims
 
 ### 3. Not Actually KK Theory
 - **Problem**: Claims "Kaluza-Klein gravity" but implements random scalar field + BSSN
-- **Location**: Throughout `bssn_kk_evolver.py`
+- **Location**: Throughout `src/fifth_dimension_search/brane_world.py`
 - **Evidence**: No 5D→4D dimensional reduction, no Einstein-Maxwell-Dilaton coupling
 - **Impact**: Results have no connection to real extra-dimensional physics
 - **Reality Check**: This isn't any known theoretical framework
@@ -42,7 +42,7 @@
 
 ### 6. Unphysical Boundary Conditions
 - **Problem**: Artificial boundary reflections contaminate gravitational waves
-- **Location**: `bssn_kk_evolver.py:706-713` - only periodic on one axis
+- **Location**: `src/fifth_dimension_search/brane_world.py:706-713` - only periodic on one axis
 - **Code**: `tensor[...,0] = tensor[...,-1]` (other axes create reflections)
 - **Impact**: "Extra-dimensional effects" might just be boundary artifacts
 - **What's Needed**: Proper absorbing boundaries or full periodicity

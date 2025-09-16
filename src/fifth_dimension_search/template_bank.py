@@ -8,7 +8,7 @@ from typing import Iterable, List, Sequence, Tuple
 import numpy as np
 import torch
 
-from bssn_brane_evolver import (
+from .brane_world import (
     BSSNParameters,
     bssn_rhs,
     enforce_boundary_conditions,

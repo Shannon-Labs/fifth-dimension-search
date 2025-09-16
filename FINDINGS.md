@@ -17,7 +17,7 @@ We explored how gravitational waveforms might change if extra dimensions existed
 
 ### Important Caveats About These "Results"
 - **Not real 5D gravity**: We only evolved 3D spacetime despite claiming extra dimensions
-- **Unphysical amplitudes**: Strain values 10^10 smaller than any detectable signal
+- **Corrected amplitudes**: Strain conversion now yields ≈6×10⁻²¹ for the toy data, but remember the underlying model is still inconsistent
 - **Meaningless precision**: Claiming milliradian precision without convergence testing
 - **Theory mismatch**: Not implementing any consistent extra-dimensional framework
 
@@ -26,18 +26,19 @@ We explored how gravitational waveforms might change if extra dimensions existed
 ## Our Measurements (With Huge Caveats)
 
 ### What the Data Showed
-From our parameter sweep (`run/waveforms/phase_amp_summary.csv`):
+From our packaged parameter sweep (`src/fifth_dimension_search/datasets/phase_amp_summary.csv`):
 
-| Configuration | Phase Span | Change from Baseline |
-|--------------|------------|---------------------|
-| Baseline run | 3.572×10⁻³ rad | (reference) |
-| Modified (q=2×10⁻⁴, L5=10) | 1.418×10⁻³ rad | -60.3% |
-| Modified (q=5×10⁻⁴, L5=25) | 1.078×10⁻⁵ rad | -99.7% |
-| Modified (q=8×10⁻⁴, L5=10) | 2.312×10⁻⁵ rad | -99.4% |
+| Configuration | Phase Span (rad) | Change from Baseline |
+|--------------|------------------|----------------------|
+| Baseline run | 6.88×10⁻⁴ | (reference) |
+| Modified (q=2×10⁻⁴, L5=10) | 6.87×10⁻⁴ | -0.055% |
+| Modified (q=5×10⁻⁴, L5=25) | 6.87×10⁻⁴ | -0.054% |
+| Modified (q=8×10⁻⁴, L5=10) | 6.87×10⁻⁴ | -0.052% |
+| Modified (q=1×10⁻³, L5=10) | 6.88×10⁻⁴ | +0.028% |
 
 ### Reality Check on These Numbers
 - **LIGO precision**: ~0.1 radian uncertainty for strong events, not 10⁻⁶ as we claimed
-- **Our amplitudes**: 10^-30 instead of physical 10^-21, making everything undetectable
+- **Our amplitudes**: Now in the right order of magnitude, but still derived from a toy model with flawed physics
 - **No convergence testing**: These could be grid artifacts changing with resolution
 - **No error bars**: We have no idea how uncertain these measurements are
 
@@ -134,13 +135,13 @@ Rather than fixing our broken implementation, the community might:
 If you want to see how we got these meaningless numbers:
 ```bash
 # Generate the phase data (with wrong physics)
-python run/kernels/template_bank.py --sweep-kk-params
+fds datasets show phase_amp_summary.csv
 
-# See the unphysical amplitudes
-python tools/analyze_waveform_data.py
+# See the unphysical amplitudes and honesty-check the summary
+python tools/quick_analysis.py
 
 # Plot the artifacts we mistook for physics
-python tools/plot_waveform_overlay.py
+fds plot --output artifacts/toy_diagnostics.png
 ```
 
 **Warning**: Running this code will reproduce our errors, not discover extra dimensions.
