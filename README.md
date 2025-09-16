@@ -64,7 +64,7 @@ The generated plot makes it obvious how far the current toy results are from det
 ## How to Contribute
 
 1. **Read [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)** – short guide covering branching, testing, and coding style.
-2. **Skim [`docs/THEORY_FRAMEWORK.md`](docs/THEORY_FRAMEWORK.md)** – understand the brane-scalar sandbox scope before proposing physics changes.
+2. **Skim [`docs/THEORY_FRAMEWORK.md`](docs/THEORY_FRAMEWORK.md)** – understand the brane-scalar sandbox scope before proposing physics changes. For working equations, see [`docs/scalar_tensor_notes.md`](docs/scalar_tensor_notes.md).
 3. Pick an item from [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md) or the open issues tab and start a discussion. Even confirming existing bugs is valuable.
 4. Use `fds datasets list` and `fds datasets show <name>` to inspect the shared fixtures, then build your improvement in a dedicated branch.
 5. Submit a pull request with before/after plots or numbers. We value transparent failure analysis over unverified claims.

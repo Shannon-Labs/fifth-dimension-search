@@ -45,7 +45,7 @@ Option A (full 5D) stays on the long-term roadmap once we have confidence in the
 
 - When opening issues or PRs, explicitly state which framework your proposal targets.
 - If you prototype equations beyond the current scalar toy, place them under `experiments/` or a draft branch until we agree on the theory scope.
-- Reference this decision log in PR descriptions to keep the terminology aligned.
+- Reference this decision log in PR descriptions to keep the terminology aligned, and consult [`scalar_tensor_notes.md`](scalar_tensor_notes.md) for the evolving set of equations.
 
 ## Open Questions
 

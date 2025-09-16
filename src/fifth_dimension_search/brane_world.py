@@ -1025,13 +1025,13 @@ def solve_initial_conditions(
     state.A_tilde.zero_()
     state.Gamma_tilde.zero_()
     if params.q != 0.0 or params.m5 != 0.0:
-        sigma_sq = (0.25 * separation ** 2) if separation > 0 else 1.0
-        radial = torch.exp(-((X ** 2 + Y ** 2 + Z ** 2) / (2.0 * sigma_sq)))
-        if params.L5 != 0.0:
-            w_mode = torch.cos(2.0 * math.pi * W / params.L5)
-        else:
-            w_mode = torch.ones_like(W)
-        state.phi_brane = 1e-2 * radial * w_mode
+        r = torch.sqrt(X ** 2 + Y ** 2 + Z ** 2).clamp_min(GEOMETRIC_EPS)
+        # Interpret m5 as an effective scalar mass (1 / length). When zero, fall back to
+        # a large interaction range in geometric units to mimic a massless scalar.
+        interaction_length = 1.0 / max(params.m5, 1e-3)
+        amplitude = params.q if params.q != 0.0 else 1e-2
+        yukawa = amplitude * torch.exp(-r / interaction_length) / (1.0 + r)
+        state.phi_brane = yukawa.to(dtype=dtype, device=device)
     else:
         state.phi_brane.zero_()
     state.A_mu.zero_()
