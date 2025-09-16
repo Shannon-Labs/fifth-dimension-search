@@ -25,6 +25,22 @@ We are intentionally repositioning the sandbox as a **brane-inspired scalar exte
 2. **Document required equations of motion** for the chosen path, including constraints and gauge conditions.
 3. **Assess computational feasibility** of the selected model (grid structure, boundary conditions, GPU requirements).
 
+## Decision (2025-09-16)
+
+We are committing the collaboration to **Option B: developing a consistent 4D scalar–tensor model** as the next milestone. The rationale:
+
+- It keeps the numerical infrastructure close to the existing BSSN + scalar code.
+- It avoids over-claiming 5D physics while still letting us explore modified gravity phenomenology.
+- It provides a concrete path to validation against well-studied Jordan–Brans–Dicke–like systems.
+
+### Immediate action items
+
+- Draft a technical note deriving the scalar–tensor equations in BSSN variables (assigned: open issue `#theory-derivation`).
+- Replace the ad-hoc standing-wave initial data with profiles consistent with the chosen scalar–tensor theory.
+- Audit uses of the parametric `W` coordinate and document whether it remains necessary; if not, plan its removal.
+
+Option A (full 5D) stays on the long-term roadmap once we have confidence in the scalar–tensor baseline.
+
 ## Guidelines for Contributors
 
 - When opening issues or PRs, explicitly state which framework your proposal targets.

@@ -5,13 +5,13 @@ This document expands on the roadmap bullets in the README and tracks medium-ter
 ## Stabilise the Numerical Core
 
 - [x] Audit the strain scaling in `brane_world.py` and add unit/CLI smoke coverage for the corrected conversion.
-- [ ] Decide whether the project should implement true Kaluza–Klein, Randall–Sundrum, or a simpler scalar-tensor toy model. Document the decision and requirements.
+- [x] Commit to the scalar–tensor (Option B) upgrade path and capture the decision in [`THEORY_FRAMEWORK.md`](THEORY_FRAMEWORK.md).
 - [ ] Replace the ad-hoc scalar field evolution with an implementation consistent with the chosen theory.
 - [ ] Add convergence tests that exercise the real evolution code (the current `convergence_test.py` is a deterministic placeholder).
 
 ## Tooling and Developer Experience
 
-- [ ] Introduce a `pytest`-based unit test suite targeting conversion helpers, waveform extraction, and CLI commands.
+- [x] Introduce a `pytest`-based unit test suite targeting conversion helpers, waveform extraction, and CLI commands.
 - [ ] Provide GitHub Actions workflows for linting, tests, and documentation builds once the test suite is stable.
 - [ ] Package example notebooks demonstrating best practices for analysing simulation outputs.
 
@@ -23,7 +23,7 @@ This document expands on the roadmap bullets in the README and tracks medium-ter
 
 ## Community & Documentation
 
-- [ ] Capture the theoretical background in a living design document, ideally with references and derivations checked by subject-matter experts.
+- [x] Capture the theoretical background in a living design document (see [`THEORY_FRAMEWORK.md`](THEORY_FRAMEWORK.md)); continue expanding with peer-reviewed references.
 - [ ] Collect starter issues suitable for students or first-time contributors.
 - [ ] Host regular office hours or recorded walkthroughs once there is sufficient interest.
 
